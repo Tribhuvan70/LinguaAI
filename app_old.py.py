@@ -6,16 +6,14 @@ from datetime import datetime
 from functools import wraps
 from flask import (Flask, render_template, request, redirect,
                    url_for, session, jsonify, flash, g)
-from dotenv import load_dotenv
 from google import genai
-
-load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-FLASH-latest")
 
 DATABASE = os.path.join(app.instance_path, "language_learning.db")
 
@@ -221,10 +219,7 @@ Respond in JSON format:
   "summary": "..."
 }}"""
         try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
+            response = model.generate_content(prompt)
             raw = response.text.strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
@@ -271,10 +266,7 @@ Respond in JSON:
   "memory_tip": "..."
 }}"""
         try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
+            response = model.generate_content(prompt)
             raw = response.text.strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
@@ -324,10 +316,7 @@ Respond ONLY in JSON:
   ]
 }}"""
         try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
+            response = model.generate_content(prompt)
             raw = response.text.strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
@@ -392,10 +381,7 @@ def api_translate():
     text, target = data.get("text",""), data.get("target_language","Spanish")
     prompt = f'Translate to {target}: "{text}"\nRespond with ONLY the translation.'
     try:
-        resp = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=prompt,
-        )
+        resp = model.generate_content(prompt)
         return jsonify({"translation": resp.text.strip()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -408,10 +394,7 @@ def word_of_day():
 Respond in JSON:
 {"word":"...","part_of_speech":"...","definition":"...","example":"...","tip":"..."}"""
     try:
-        resp = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=prompt,
-        )
+        resp = model.generate_content(prompt)
         raw  = resp.text.strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
