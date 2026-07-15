@@ -13,7 +13,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-producti
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 DATABASE = os.path.join(app.instance_path, "language_learning.db")
 
