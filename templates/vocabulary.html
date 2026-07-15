@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Vocabulary Builder — LinguaAI{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="page-header mb-4">
+    <h3 class="fw-bold mb-1"><i class="fas fa-book-open text-success me-2"></i>Vocabulary Builder</h3>
+    <p class="text-muted mb-0">Discover word meanings, examples, synonyms, and memory tips powered by AI.</p>
+  </div>
+
+  <!-- Search form -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form method="POST" class="d-flex gap-3">
+        <div class="flex-grow-1">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-success text-white"><i class="fas fa-search"></i></span>
+            <input type="text" name="word" class="form-control"
+              placeholder="Enter any English word (e.g. 'ephemeral', 'resilient', 'serendipity')"
+              value="{{ request.form.word if word_data else '' }}" required/>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg px-4">
+          <i class="fas fa-bolt me-2"></i>Explore
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% if word_data %}
+  <!-- Word card -->
+  <div class="card border-0 shadow word-card mb-4">
+    <div class="card-header word-card-header">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h2 class="fw-bold mb-1 text-white">{{ word_data.word }}</h2>
+          <span class="badge bg-white text-dark me-2">{{ word_data.part_of_speech }}</span>
+          <span class="badge bg-light text-dark me-2">{{ word_data.pronunciation }}</span>
+          <span class="badge bg-warning text-dark">{{ word_data.difficulty_level }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <div class="col-md-8">
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2">Definition</h6>
+          <p class="fs-5 mb-3">{{ word_data.definition }}</p>
+          <p class="text-muted">{{ word_data.detailed_explanation }}</p>
+
+          {% if word_data.examples %}
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2 mt-3">Examples</h6>
+          {% for ex in word_data.examples %}
+          <div class="example-sentence">
+            <i class="fas fa-quote-left text-success me-2 small"></i>{{ ex }}
+          </div>
+          {% endfor %}
+          {% endif %}
+
+          <div class="alert alert-warning mt-3 py-2">
+            <i class="fas fa-lightbulb me-2"></i><strong>Memory Tip:</strong> {{ word_data.memory_tip }}
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          {% if word_data.synonyms %}
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2">Synonyms</h6>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for s in word_data.synonyms %}
+            <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1">{{ s }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if word_data.antonyms %}
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2">Antonyms</h6>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for a in word_data.antonyms %}
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1">{{ a }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if word_data.word_family %}
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2">Word Family</h6>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for w in word_data.word_family %}
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1">{{ w }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if word_data.etymology %}
+          <h6 class="fw-bold text-muted text-uppercase tracking-wide mb-2">Etymology</h6>
+          <p class="text-muted small">{{ word_data.etymology }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Saved words -->
+  {% if saved %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+      <i class="fas fa-bookmark text-success me-2"></i>Saved Words ({{ saved|length }})
+    </div>
+    <div class="card-body">
+      <div class="row g-2">
+        {% for v in saved %}
+        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+          <div class="vocab-chip">
+            <div class="fw-medium">{{ v.word }}</div>
+            <small class="text-muted text-truncate d-block">{{ v.definition[:40] }}…</small>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

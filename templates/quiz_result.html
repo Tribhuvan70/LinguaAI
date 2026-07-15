@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Quiz Result — LinguaAI{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:800px">
+  {% set pct = (score/total*100)|int %}
+  <div class="card border-0 shadow mb-4">
+    <div class="card-body text-center py-5
+      {% if pct >= 80 %}bg-success{% elif pct >= 50 %}bg-warning{% else %}bg-danger{% endif %}
+      text-white rounded-top">
+      <div class="result-emoji mb-2" style="font-size:3rem">
+        {% if pct >= 80 %}🎉{% elif pct >= 50 %}👍{% else %}💪{% endif %}
+      </div>
+      <h2 class="fw-bold">{{ score }} / {{ total }}</h2>
+      <p class="fs-5 mb-1">{{ pct }}% Score — {{ topic }}</p>
+      <p class="opacity-75 mb-0">
+        {% if pct >= 80 %}Excellent! You're a language master!
+        {% elif pct >= 60 %}Good job! Keep practicing!
+        {% elif pct >= 40 %}Nice try! Review the explanations below.
+        {% else %}Don't give up! Learning takes time.{% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% for r in results %}
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header fw-medium
+      {% if r.is_correct %}bg-success bg-opacity-10 text-success{% else %}bg-danger bg-opacity-10 text-danger{% endif %}">
+      <i class="fas fa-{% if r.is_correct %}check{% else %}times{% endif %}-circle me-2"></i>
+      Q{{ r.id }}: {{ r.question }}
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        {% for key, val in r.options.items() %}
+        <div class="col-md-6">
+          <div class="result-option
+            {% if key == r.correct %}correct{% elif key == r.user_answer and not r.is_correct %}wrong{% endif %}">
+            <span class="fw-bold me-2">{{ key }}.</span>{{ val }}
+            {% if key == r.correct %}<i class="fas fa-check float-end text-success"></i>{% endif %}
+            {% if key == r.user_answer and not r.is_correct %}<i class="fas fa-times float-end text-danger"></i>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="alert alert-light py-2 mb-0">
+        <i class="fas fa-info-circle text-primary me-1"></i>{{ r.explanation }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="d-flex gap-3 justify-content-center mt-3">
+    <a href="{{ url_for('quiz') }}" class="btn btn-primary px-4">
+      <i class="fas fa-plus me-2"></i>New Quiz
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary px-4">
+      <i class="fas fa-home me-2"></i>Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

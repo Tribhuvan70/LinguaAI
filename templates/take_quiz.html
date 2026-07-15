@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.topic }} Quiz — LinguaAI{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:760px">
+  <div class="card border-0 shadow">
+    <div class="card-header bg-warning text-dark py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="fas fa-question-circle me-2"></i>{{ quiz.topic }}</h5>
+        <span class="badge bg-dark">{{ questions|length }} Questions</span>
+      </div>
+      <div class="progress mt-2" style="height:4px">
+        <div class="progress-bar bg-dark" id="quizProgress" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST" id="quizForm">
+        {% for q in questions %}
+        <div class="quiz-question mb-4 {% if not loop.first %}d-none{% endif %}" data-question="{{ loop.index }}">
+          <div class="d-flex align-items-center mb-3">
+            <span class="question-number">{{ loop.index }}</span>
+            <p class="mb-0 ms-3 fw-medium fs-5">{{ q.question }}</p>
+          </div>
+          <div class="row g-2">
+            {% for key, val in q.options.items() %}
+            <div class="col-md-6">
+              <label class="option-label w-100">
+                <input type="radio" name="q{{ q.id }}" value="{{ key }}" class="d-none" required/>
+                <span class="option-letter">{{ key }}</span>
+                <span class="option-text">{{ val }}</span>
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+          <button type="button" class="btn btn-outline-secondary" id="prevBtn" disabled onclick="navigate(-1)">
+            <i class="fas fa-arrow-left me-1"></i>Previous
+          </button>
+          <span class="text-muted small" id="questionCounter">Question 1 of {{ questions|length }}</span>
+          <button type="button" class="btn btn-warning" id="nextBtn" onclick="navigate(1)">
+            Next<i class="fas fa-arrow-right ms-1"></i>
+          </button>
+          <button type="submit" class="btn btn-success d-none" id="submitBtn">
+            <i class="fas fa-check-circle me-1"></i>Submit Quiz
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let current = 1;
+const total = {{ questions|length }};
+
+function navigate(dir) {
+  const qs = document.querySelectorAll('.quiz-question');
+  qs[current - 1].classList.add('d-none');
+  current += dir;
+  qs[current - 1].classList.remove('d-none');
+  document.getElementById('questionCounter').textContent = `Question ${current} of ${total}`;
+  document.getElementById('prevBtn').disabled = (current === 1);
+  document.getElementById('quizProgress').style.width = `${(current/total)*100}%`;
+  if (current === total) {
+    document.getElementById('nextBtn').classList.add('d-none');
+    document.getElementById('submitBtn').classList.remove('d-none');
+  } else {
+    document.getElementById('nextBtn').classList.remove('d-none');
+    document.getElementById('submitBtn').classList.add('d-none');
+  }
+}
+
+// Highlight selected option
+document.querySelectorAll('.option-label').forEach(label => {
+  label.addEventListener('click', function() {
+    const name = this.querySelector('input').name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.option-label').classList.remove('selected');
+    });
+    this.classList.add('selected');
+  });
+});
+</script>
+{% endblock %}

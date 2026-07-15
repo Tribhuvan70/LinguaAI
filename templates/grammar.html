@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Grammar Checker — LinguaAI{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="page-header mb-4">
+    <h3 class="fw-bold mb-1"><i class="fas fa-spell-check text-primary me-2"></i>Grammar Checker</h3>
+    <p class="text-muted mb-0">Paste your text below and let AI analyze grammar, style, and clarity.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-primary text-white fw-semibold">
+          <i class="fas fa-edit me-2"></i>Input Text
+        </div>
+        <div class="card-body">
+          <form method="POST" id="grammarForm">
+            <textarea name="text" id="inputText" class="form-control mb-3"
+              rows="10" placeholder="Paste or type your text here to check grammar..."
+              required>{% if result %}{{ request.form.text }}{% endif %}</textarea>
+            <div class="d-flex justify-content-between align-items-center">
+              <span id="charCount" class="text-muted small">0 characters</span>
+              <button type="submit" class="btn btn-primary px-4" id="checkBtn">
+                <i class="fas fa-search me-2"></i>Check Grammar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      {% if result %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-success text-white fw-semibold">
+          <i class="fas fa-check-circle me-2"></i>Analysis Results
+          <span class="badge bg-white text-success ms-2">Score: {{ result.score }}/10</span>
+        </div>
+        <div class="card-body">
+          <!-- Score bar -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="fw-medium">Grammar Score</small>
+              <small class="text-muted">{{ result.score }}/10</small>
+            </div>
+            <div class="progress" style="height:10px">
+              <div class="progress-bar bg-success" style="width:{{ result.score*10 }}%"></div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="alert alert-info py-2 mb-3">
+            <i class="fas fa-info-circle me-1"></i><strong>Summary:</strong> {{ result.summary }}
+          </div>
+
+          <!-- Corrected Text -->
+          <div class="mb-3">
+            <h6 class="fw-semibold"><i class="fas fa-check text-success me-1"></i>Corrected Text</h6>
+            <div class="bg-light p-3 rounded">{{ result.corrected_text }}</div>
+          </div>
+
+          <!-- Errors -->
+          {% if result.errors %}
+          <div class="mb-3">
+            <h6 class="fw-semibold"><i class="fas fa-times-circle text-danger me-1"></i>Errors Found ({{ result.errors|length }})</h6>
+            {% for err in result.errors %}
+            <div class="error-card mb-2">
+              <div class="d-flex gap-2 mb-1">
+                <span class="badge bg-danger">Wrong</span>
+                <span class="text-danger">{{ err.original }}</span>
+                <span>→</span>
+                <span class="badge bg-success">Correct</span>
+                <span class="text-success">{{ err.corrected }}</span>
+              </div>
+              <small class="text-muted">{{ err.explanation }}</small>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- Suggestions -->
+          {% if result.suggestions %}
+          <div>
+            <h6 class="fw-semibold"><i class="fas fa-lightbulb text-warning me-1"></i>Style Suggestions</h6>
+            <ul class="list-unstyled mb-0">
+              {% for s in result.suggestions %}
+              <li class="mb-1"><i class="fas fa-arrow-right text-primary me-2 small"></i>{{ s }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-5">
+          <div class="feature-icon-lg text-primary mb-3">
+            <i class="fas fa-spell-check fa-3x opacity-25"></i>
+          </div>
+          <h5 class="text-muted fw-normal">Your results will appear here</h5>
+          <p class="text-muted small">Enter text on the left and click "Check Grammar"</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- History -->
+  {% if history %}
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold">
+      <i class="fas fa-history text-secondary me-2"></i>Recent Checks
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr><th>Date</th><th>Text</th><th>Score</th></tr>
+          </thead>
+          <tbody>
+            {% for h in history %}
+            {% set r = h.result | from_json %}
+            <tr>
+              <td class="text-muted small">{{ h.created_at[:10] }}</td>
+              <td class="small">{{ h.input_text[:80] }}{% if h.input_text|length > 80 %}…{% endif %}</td>
+              <td><span class="badge bg-primary">{{ r.score }}/10</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}AI Language Learning System{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% if session.get('user_id') %}
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">
+      <i class="fas fa-brain me-2"></i>LinguaAI
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}"
+             href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint=='grammar' %}active{% endif %}"
+             href="{{ url_for('grammar') }}"><i class="fas fa-spell-check me-1"></i>Grammar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint=='vocabulary' %}active{% endif %}"
+             href="{{ url_for('vocabulary') }}"><i class="fas fa-book-open me-1"></i>Vocabulary</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint=='quiz' %}active{% endif %}"
+             href="{{ url_for('quiz') }}"><i class="fas fa-question-circle me-1"></i>Quiz</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-2">
+          <span class="text-white-50 small"><i class="fas fa-user-circle me-1"></i>{{ session.username }}</span>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<main class="{% if session.get('user_id') %}main-content{% endif %}">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container-fluid px-4 pt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
